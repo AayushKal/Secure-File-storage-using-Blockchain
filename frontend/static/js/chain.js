@@ -25,7 +25,6 @@ const BrowserChain = (() => {
 
   /* ── Validate a single block ─────────────────────────────────── */
   async function validateBlock(block) {
-    // 1. Recompute the hash from the block's own fields
     const computed = await sha256({
       index:         block.index,
       timestamp:     block.timestamp,
@@ -33,15 +32,10 @@ const BrowserChain = (() => {
       previous_hash: block.previous_hash,
       nonce:         block.nonce,
     });
-
-    // 2. Hash must match what is stored
     if (computed !== block.hash) return false;
-
-    // 3. Hash must satisfy proof-of-work
     if (!block.hash.startsWith("0".repeat(DIFFICULTY))) return false;
-
     return true;
-  }
+}
 
   /* ── Validate the entire chain ───────────────────────────────── */
   async function validateChain(chain) {
