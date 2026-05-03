@@ -52,16 +52,14 @@ async function pollChain() {
     if (!res.ok) return;
     const data = await res.json();
 
-    // Update status bar
-    document.getElementById("status-blocks").textContent = data.length;
-    const validEl = document.getElementById("status-valid");
-    validEl.textContent  = data.is_valid ? "✓ valid" : "✗ invalid";
-    validEl.style.color  = data.is_valid ? "var(--accent2)" : "var(--danger)";
+    // FIX: data is an object {length, is_valid, blocks}, not an array
+    const blocks = data.blocks || [];
 
-    // Keep BrowserChain in sync for client-side validation
-    if (data.blocks && data.blocks.length) {
-      await BrowserChain.syncChain(data.blocks);
-    }
+    // Update status bar
+    document.getElementById("status-blocks").textContent = blocks.length;
+    const validEl = document.getElementById("status-valid");
+    validEl.textContent = data.is_valid ? "✓ valid" : "✗ invalid";
+    validEl.style.color = data.is_valid ? "var(--accent2)" : "var(--danger)";
 
     // Refresh file list if that tab is open
     const filesPanel = document.getElementById("tab-files");
@@ -154,7 +152,7 @@ async function uploadFile() {
   } catch (e) {
     show("up-result", e.message, "err");
   } finally {
-    btn.disabled  = false;
+    btn.disabled    = false;
     btn.textContent = "Upload & Register on Chain";
   }
 }
@@ -246,21 +244,24 @@ async function verifyFile() {
 /* ── Browser-side chain validation ─────────────────────────── */
 async function validateChain() {
   const btn = document.getElementById("cv-btn");
-  btn.disabled   = true;
+  btn.disabled    = true;
   btn.textContent = "Fetching chain…";
 
   try {
-    // Always fetch a fresh copy — no dependency on WebSocket
+    // Always fetch a fresh copy — no dependency on WebSocket or cached state
     const res  = await fetch("/api/chain", { credentials: "include" });
     const data = await res.json();
     if (!res.ok) throw new Error("Could not fetch chain");
 
+    // FIX: extract blocks array directly, never use syncChain for validation
     const chain = data.blocks || [];
     if (!chain.length) {
       show("cv-result", "Chain is empty.", "info"); return;
     }
 
     btn.textContent = "Validating…";
+
+    // Validate directly — no syncChain, no cached state interference
     const valid = await BrowserChain.validateChain(chain);
 
     show("cv-result",
@@ -273,7 +274,7 @@ async function validateChain() {
   } catch (e) {
     show("cv-result", e.message, "err");
   } finally {
-    btn.disabled   = false;
+    btn.disabled    = false;
     btn.textContent = "Run Browser Validation";
   }
 }
