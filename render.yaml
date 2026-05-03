@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: chainvault
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn api.server:app --timeout 120 --workers 1
+    envVars:
+      - key: MONGO_URI
+        sync: false          # set this in the Render dashboard
+      - key: SECRET_KEY
+        sync: false          # set this in the Render dashboard
+      - key: ENCRYPTION_PASSPHRASE
+        sync: false          # set this in the Render dashboard
+      - key: PINATA_KEY
+        sync: false
+      - key: PINATA_SECRET
+        sync: false

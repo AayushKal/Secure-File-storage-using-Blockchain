@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainVault — Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="brand">
+    <div class="logo-icon"></div>
+    <span>ChainVault</span>
+  </div>
+
+  <div class="auth-card">
+    <h1>Create account</h1>
+    <p class="sub">Join the blockchain file storage network</p>
+
+    <div id="error-box" class="error-box" style="display:none"></div>
+
+    <div class="field">
+      <label>Username <span class="hint">(min 3 characters)</span></label>
+      <input type="text" id="username" placeholder="choose a username" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label>Password <span class="hint">(min 6 characters)</span></label>
+      <input type="password" id="password" placeholder="choose a password" autocomplete="new-password">
+    </div>
+
+    <div class="field">
+      <label>Confirm password</label>
+      <input type="password" id="password2" placeholder="repeat your password" autocomplete="new-password">
+    </div>
+
+    <button class="btn-auth" id="reg-btn" onclick="doRegister()">Create Account</button>
+
+    <p class="switch">Already have an account? <a href="/login">Sign in</a></p>
+  </div>
+
+  <p class="footnote">First registered user becomes admin automatically.</p>
+</div>
+<script src="/static/js/auth.js"></script>
+<script>
+async function doRegister() {
+  const username  = document.getElementById("username").value.trim();
+  const password  = document.getElementById("password").value.trim();
+  const password2 = document.getElementById("password2").value.trim();
+
+  if (!username || !password || !password2)
+    return showError("Please fill in all fields.");
+  if (password !== password2)
+    return showError("Passwords do not match.");
+  if (password.length < 6)
+    return showError("Password must be at least 6 characters.");
+
+  await authRequest("/api/auth/register", { username, password }, "/");
+}
+document.addEventListener("keydown", e => { if (e.key === "Enter") doRegister(); });
+</script>
+</body>
+</html>

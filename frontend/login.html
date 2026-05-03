@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainVault — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="brand">
+    <div class="logo-icon"></div>
+    <span>ChainVault</span>
+  </div>
+
+  <div class="auth-card">
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to access your blockchain storage</p>
+
+    <div id="error-box" class="error-box" style="display:none"></div>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="your username" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-auth" id="login-btn" onclick="doLogin()">Sign In</button>
+
+    <p class="switch">No account? <a href="/register">Create one</a></p>
+  </div>
+
+  <p class="footnote">First registered user becomes admin automatically.</p>
+</div>
+<script src="/static/js/auth.js"></script>
+<script>
+async function doLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if (!username || !password) return showError("Please fill in all fields.");
+  await authRequest("/api/auth/login", { username, password }, "/");
+}
+// Allow Enter key
+document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+</script>
+</body>
+</html>

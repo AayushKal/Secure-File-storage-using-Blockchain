@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon"></div>
+    ChainVault
+  </div>
+  <div class="header-right">
+    <span id="user-display" class="user-tag"></span>
+    <button class="btn-logout" onclick="logout()">logout</button>
+  </div>
+</header>
+
+<!-- ── Status bar ────────────────────────────────────────────────── -->
+<div class="status-bar">
+  <div class="status-item">
+    <span class="status-label">Blocks</span>
+    <span class="status-val" id="status-blocks">—</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Chain</span>
+    <span class="status-val" id="status-valid">—</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Storage</span>
+    <span class="status-val accent">IPFS + Blockchain</span>
+  </div>
+  <div class="status-item">
+    <span class="status-label">Encryption</span>
+    <span class="status-val accent">Fernet AES-128</span>
+  </div>
+</div>
+
+<!-- ── Main ──────────────────────────────────────────────────────── -->
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('upload')">Upload</button>
+    <button class="tab" onclick="showTab('manage')">Manage</button>
+    <button class="tab" onclick="showTab('verify')">Verify</button>
+    <button class="tab" onclick="showTab('history')">History</button>
+    <button class="tab" onclick="showTab('files')">All Files</button>
+  </div>
+
+  <!-- Upload -->
+  <div class="tab-panel active" id="tab-upload">
+    <div class="card">
+      <div class="card-title">Upload File to Blockchain</div>
+      <p class="info-text">
+        Uploading as: <span class="accent" id="upload-as">—</span>
+      </p>
+      <label>File</label>
+      <input type="file" id="up-file">
+      <button class="btn btn-primary" id="up-btn" onclick="uploadFile()">
+        Upload &amp; Register on Chain
+      </button>
+      <div id="up-result"></div>
+    </div>
+  </div>
+
+  <!-- Manage -->
+  <div class="tab-panel" id="tab-manage">
+    <div class="card">
+      <div class="card-title">Grant Access</div>
+      <label>File ID</label>
+      <input type="text" id="gr-file-id" placeholder="Paste file ID">
+      <label>Grant access to (username)</label>
+      <input type="text" id="gr-user" placeholder="e.g. bob">
+      <button class="btn btn-success" onclick="grantAccess()">Grant Access</button>
+      <div id="gr-result"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Revoke Access</div>
+      <label>File ID</label>
+      <input type="text" id="rv-file-id" placeholder="Paste file ID">
+      <label>Revoke access from (username)</label>
+      <input type="text" id="rv-user" placeholder="e.g. bob">
+      <button class="btn btn-danger" onclick="revokeAccess()">Revoke Access</button>
+      <div id="rv-result"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Download File</div>
+      <label>File ID</label>
+      <input type="text" id="dl-file-id" placeholder="Paste file ID">
+      <button class="btn btn-ghost" onclick="downloadFile()">
+        Download &amp; Decrypt
+      </button>
+      <div id="dl-result"></div>
+    </div>
+  </div>
+
+  <!-- Verify -->
+  <div class="tab-panel" id="tab-verify">
+    <div class="card">
+      <div class="card-title">Verify File Integrity</div>
+      <p class="info-text">
+        The server compares the hash you provide against the one recorded on
+        the blockchain at upload time.
+      </p>
+      <label>File ID</label>
+      <input type="text" id="vf-file-id" placeholder="Paste file ID">
+      <label>Original file hash (from upload receipt)</label>
+      <input type="text" id="vf-hash" placeholder="Paste SHA-256 hash">
+      <button class="btn btn-primary" onclick="verifyFile()">Verify Integrity</button>
+      <div id="vf-result"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Browser Chain Validation</div>
+      <p class="info-text">
+        Your browser fetches the full chain and independently re-computes
+        every SHA-256 hash using the same logic as the server.
+        No server trust required for this check.
+      </p>
+      <button class="btn btn-ghost" id="cv-btn" onclick="validateChain()">
+        Run Browser Validation
+      </button>
+      <div id="cv-result"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="tab-panel" id="tab-history">
+    <div class="card">
+      <div class="card-title">Audit Trail</div>
+      <label>File ID</label>
+      <div class="row">
+        <input type="text" id="hi-file-id" placeholder="Paste file ID">
+        <button class="btn btn-ghost" onclick="getHistory()">Load</button>
+      </div>
+      <div id="hi-result"></div>
+    </div>
+  </div>
+
+  <!-- All Files -->
+  <div class="tab-panel" id="tab-files">
+    <div class="card">
+      <div class="card-title">Files on the Blockchain</div>
+      <p class="info-text" id="files-scope-note"></p>
+      <button class="btn btn-ghost" onclick="loadFiles()"
+              style="margin-bottom:1rem">Refresh</button>
+      <div class="file-grid" id="file-grid">
+        <div class="empty">Click refresh to load</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script src="/static/js/chain.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
